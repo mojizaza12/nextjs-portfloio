@@ -9,11 +9,8 @@ import { BlurFade } from "@/components/magicui/blur-fade";
 import { ShimmerButton } from "@/components/magicui/shimmer-button";
 import { ArrowUpRight } from "lucide-react";
 import Link from 'next/link'
-import { motion } from "motion/react";
 import { TypeAnimation } from "react-type-animation";
 
-
- 
 export function HeroSection() {
   const { resolvedTheme } = useTheme();
   const [color, setColor] = useState("#ffffff");
@@ -35,7 +32,7 @@ export function HeroSection() {
         <div className="static flex h-screen w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background/50">
           <div className="text-center px-4">
             <h1 className="flex items-center justify-center gap-2 text-4xl sm:text-6xl md:text-8xl font-semibold leading-none">
-              Bannawat's Portfolio
+              Bannawat&apos;s Portfolio
               <Image 
                 src={waveEmoji}
                 alt="Wave emoji"

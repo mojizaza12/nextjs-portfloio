@@ -146,6 +146,10 @@ export const ScratchToReveal: React.FC<ScratchToRevealProps> = ({
     }
   };
 
+  useEffect(() => {
+    checkCompletion();
+  }, [checkCompletion]);
+
   return (
     <motion.div
       className={cn("relative select-none", className)}

@@ -6,6 +6,7 @@ import TrynotToBug from "../Try-not-to-have-Bug/trynottohavebug";
 const PortFloioSection = () => {
   return (
     <BlurFade delay={0.15} inView>
+      <section id="Portfolio">
       
       <div className="flex justify-center w-full p-4">
         <div className="flex flex-col md:flex-row max-w-4xl w-full">
@@ -34,6 +35,7 @@ const PortFloioSection = () => {
           </div>
         </div>
       </div>
+      </section>
     </BlurFade>
   );
 };
