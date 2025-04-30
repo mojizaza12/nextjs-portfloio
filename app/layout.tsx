@@ -6,7 +6,8 @@ import { ScrollProgress } from "@/components/magicui/scroll-progress";
 
 const KanitSans = Kanit({
   variable: "--font-kanit",
-  weight: "100"
+  weight: "100",
+  subsets: ["thai"],
 });
 
 const geistMono = Geist_Mono({
