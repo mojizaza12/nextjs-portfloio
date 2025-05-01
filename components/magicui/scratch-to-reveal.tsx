@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { motion, useAnimation } from "motion/react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 
 interface ScratchToRevealProps {
   children: React.ReactNode;
@@ -121,7 +121,7 @@ export const ScratchToReveal: React.FC<ScratchToRevealProps> = ({
     }
   };
 
-  const checkCompletion = () => {
+  const checkCompletion = useCallback(() => {
     if (isComplete) return;
 
     const canvas = canvasRef.current;
@@ -144,7 +144,7 @@ export const ScratchToReveal: React.FC<ScratchToRevealProps> = ({
         startAnimation();
       }
     }
-  };
+  }, [isComplete, minScratchPercentage, startAnimation]);
 
   useEffect(() => {
     checkCompletion();

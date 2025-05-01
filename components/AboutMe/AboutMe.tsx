@@ -2,19 +2,22 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Particles } from "../magicui/particles";
-import Image from 'next/image';
+// import { Particles } from "../magicui/particles";
+// import Image from 'next/image';
 import { SparklesText } from "../magicui/sparkles-text";
 import { ScrollFade, ScrollFadeItem } from "../magicui/scroll-fade";
 import ScratchToReviewPicture from "../ScratchToReviewPicture/ScratchToReviewPicture";
-import { section } from "motion/react-client";
+// import { section } from "motion/react-client";
 
 const AboutMe = () => {
   const { resolvedTheme } = useTheme();
+  // Either use color or remove it
   const [color, setColor] = useState("#ffffff");
  
   useEffect(() => {
     setColor(resolvedTheme === "dark" ? "#ffffff" : "#000000");
+    // You can add a comment explaining why color is set but not used
+    // For example: // Color is set for future use in animations
   }, [resolvedTheme]);
 
   return (
@@ -48,14 +51,14 @@ const AboutMe = () => {
                   <ScrollFadeItem delay={0.1}>
                     <p className="mb-4">
                       I am a passionate Full Stack Developer with expertise in modern web technologies.
-                      My journey in software development started when I was young, and I've been building
+                      My journey in software development started when I was young, and I&apos;ve been building
                       digital experiences ever since.
                     </p>
                   </ScrollFadeItem>
                   
                   <ScrollFadeItem delay={0.2}>
                     <p className="mb-4">
-                      When I'm not coding, you can find me exploring new technologies, contributing to
+                      When I&apos;m not coding, you can find me exploring new technologies, contributing to
                       open-source projects, or sharing my knowledge with the community.
                     </p>
                   </ScrollFadeItem>
