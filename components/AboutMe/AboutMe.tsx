@@ -22,7 +22,7 @@ const AboutMe = () => {
 
   return (
     <>
-      <section id="AboutMe" className="py-16">
+      <section id="AboutMe" className="py-8">
         <div className="container mx-auto px-4">
           <ScrollFade>
             <div className="flex flex-col items-center mb-12">

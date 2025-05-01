@@ -62,7 +62,7 @@ export function HeroSection() {
 
           <div className="absolute bottom-20 sm:bottom-32 w-full flex justify-center">
             <Link href="#Portfolio">
-              <ShimmerButton className="mt-4 gap-2 text-base sm:text-lg text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
+              <ShimmerButton className="mt-4 gap-2 text-base sm:text-lg text-white dark:text-white lg:text-lg bg-black/80 dark:bg-white/10">
                 <span>View Portfolio</span>
                 <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </ShimmerButton>

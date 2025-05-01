@@ -1,17 +1,20 @@
 import AboutMe from "@/components/AboutMe/AboutMe"
+import { DockComponent } from "@/components/Dock/Dock"
+import Footer from "@/components/Footer/Footer"
 import{ HeroSection } from "@/components/HeroSection/HeroSection"
 import PortFloioSection from "@/components/PortFloioSection/PortFloioSection"
 
 const page = () => {
   return (
-    <div className="scrollbar-hide h-full w-full overflow-auto">
-        
+    <div className="h-full w-full overflow-visible">
       <HeroSection />
       
-      {/* Portfloio Section */}
+      {/* Portfolio Section */}
       <PortFloioSection />
       <AboutMe />
-      </div>
+      <DockComponent />
+      <Footer />
+    </div>
   )
 }
 export default page
