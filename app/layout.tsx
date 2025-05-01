@@ -8,7 +8,7 @@ const KanitSans = Kanit({
   variable: "--font-kanit",
   weight: "100",
   subsets: ["thai"],
-});
+});2
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -34,7 +34,6 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
-          enableSystem
           disableTransitionOnChange
         >
           <ScrollProgress />

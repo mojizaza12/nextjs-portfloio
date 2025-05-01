@@ -1,11 +1,13 @@
 import DaysLived from "../DaysLived/page";
 import HaveFriends from "../HaveFriends/Friends";
 import { BlurFade } from "../magicui/blur-fade";
+import { Meteors } from "../magicui/meteors";
 import TrynotToBug from "../Try-not-to-have-Bug/trynottohavebug";
 
 const PortFloioSection = () => {
   return (
     <BlurFade delay={0.15} inView>
+      <Meteors />
       <section id="Portfolio">
       
       <div className="flex justify-center w-full p-4">

@@ -1,3 +1,4 @@
+import AboutMe from "@/components/AboutMe/AboutMe"
 import{ HeroSection } from "@/components/HeroSection/HeroSection"
 import PortFloioSection from "@/components/PortFloioSection/PortFloioSection"
 
@@ -9,6 +10,7 @@ const page = () => {
       
       {/* Portfloio Section */}
       <PortFloioSection />
+      <AboutMe />
       </div>
   )
 }

@@ -10,6 +10,7 @@ import { ShimmerButton } from "@/components/magicui/shimmer-button";
 import { ArrowUpRight } from "lucide-react";
 import Link from 'next/link'
 import { TypeAnimation } from "react-type-animation";
+import { SparklesText } from "../magicui/sparkles-text";
 
 export function HeroSection() {
   const { resolvedTheme } = useTheme();
@@ -21,18 +22,20 @@ export function HeroSection() {
  
   return (
     <>
-      <Particles
-        className="fixed inset-0 -z-10"
-        quantity={100}
-        ease={80}
-        color={color}
-        refresh
-      />
       <BlurFade delay={0.15} inView>
-        <div className="static flex h-screen w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background/50">
+        <div className="relative flex h-screen w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background/50">
+          <Particles
+            className="absolute inset-0 -z-10"
+            quantity={100}
+            ease={80}
+            color={color}
+            refresh
+          />
           <div className="text-center px-4">
             <h1 className="flex items-center justify-center gap-2 text-4xl sm:text-6xl md:text-8xl font-semibold leading-none">
+            <SparklesText sparklesCount={5}>
               Bannawat&apos;s Portfolio
+              </SparklesText>
               <Image 
                 src={waveEmoji}
                 alt="Wave emoji"
@@ -59,7 +62,7 @@ export function HeroSection() {
 
           <div className="absolute bottom-20 sm:bottom-32 w-full flex justify-center">
             <Link href="#Portfolio">
-              <ShimmerButton className="mt-4 gap-2 text-base sm:text-lg">
+              <ShimmerButton className="mt-4 gap-2 text-base sm:text-lg text-white dark:from-white dark:to-slate-900/10 lg:text-lg">
                 <span>View Portfolio</span>
                 <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </ShimmerButton>
