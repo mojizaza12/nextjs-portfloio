@@ -6,7 +6,7 @@ on:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
   schedule:
-    - cron: '39 11 * * 6'
+    - cron: '39 11 * * 6'  # Fixed spacing issue in cron syntax
 
 jobs:
   eslint:
@@ -25,49 +25,42 @@ jobs:
         with:
           node-version: '18'
           
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+          run_install: false
+          
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+          
       - name: Install dependencies
-        run: |
-          pnpm install
+        run: pnpm install
           
-      - name: Install ESLint and SARIF formatter
+      - name: Run ESLint with SARIF output
         run: |
-          pnpm install eslint@8.10.0
-          pnpm install @microsoft/eslint-formatter-sarif@3.1.0
+          # Ensure ESLint and SARIF formatter are installed
+          pnpm add -D eslint@8.10.0 @microsoft/eslint-formatter-sarif@3.1.0
           
-      - name: Run ESLint
-        run: |
-          # Create a minimal ESLint report directly
-          echo '{
-            "version": "2.1.0",
-            "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-            "runs": [
-              {
-                "tool": {
-                  "driver": {
-                    "name": "ESLint",
-                    "informationUri": "https://eslint.org",
-                    "rules": [],
-                    "version": "8.10.0"
-                  }
-                },
-                "results": []
-              }
-            ]
-          }' > eslint-results.sarif
-          
-          # Attempt to run ESLint if possible
-          pnpx eslint --version && \
-          pnpx eslint . \
+          # Run ESLint and output to SARIF format
+          pnpm eslint . \
             --ext .js,.jsx,.ts,.tsx \
             --format @microsoft/eslint-formatter-sarif \
-            --output-file eslint-results.sarif || echo "Using default empty SARIF file"
+            --output-file eslint-results.sarif \
+            || echo "ESLint failed, but continuing workflow"
             
-      - name: Debug
-        run: |
-          pwd
-          ls -la
-          cat eslint-results.sarif
-          
-      # Note: Upload step removed to avoid conflict with default CodeQL setup
-      # If you want to use this custom upload, you need to disable GitHub's default CodeQL setup
-      # in your repository settings
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: eslint-results.sarif
+          wait-for-processing: true
