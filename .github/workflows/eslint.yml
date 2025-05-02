@@ -6,10 +6,6 @@ on:
   push:
     branches: [ main ]
 
-permissions:
-  contents: read
-  security-events: write
-
 jobs:
   lint-and-upload:
     runs-on: ubuntu-latest
@@ -51,7 +47,7 @@ jobs:
             --output-file eslint-results.sarif \
             || echo "ESLint found issues but continuing workflow"
           
-          # Ensure the SARIF file exists even if ESLint had an error
+          # Make sure the file exists even if ESLint had an error
           if [ ! -f eslint-results.sarif ]; then
             echo '{"version":"2.1.0","runs":[{"tool":{"driver":{"name":"ESLint","informationUri":"https://eslint.org"}},"results":[]}]}' > eslint-results.sarif
             echo "Created empty SARIF file because ESLint failed to generate one"
