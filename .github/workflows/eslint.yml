@@ -1,52 +1,66 @@
-name: ESLint & CodeQL
+name: ESLint & CodeQL Scan
 
 on:
-  push:   { branches: [ "main" ] }
-  pull_request: { branches: [ "main" ] }
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   schedule:
     - cron: '39 11 * * 6'
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 jobs:
   lint-and-scan:
+    name: Run ESLint and Upload SARIF
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
 
     steps:
+      # 1. Check out your repo
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm & Node
+      # 2. Install pnpm via the official setup action
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
-      - uses: actions/setup-node@v4
+
+      # 3. Install Node 20 (required for CodeQL v3) and cache pnpm deps
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
 
-      - name: Install deps & ESLint SARIF formatter
+      # 4. Install project dependencies and add ESLint + SARIF formatter
+      - name: Install dependencies
         run: |
           pnpm install
-          pnpm add -D eslint@8.10.0 @microsoft/eslint-formatter-sarif@3.1.0
+          pnpm add -D eslint@8.10.0 \
+                    @microsoft/eslint-formatter-sarif@3.1.0
 
+      # 5. Run ESLint, emit SARIF
       - name: Run ESLint → SARIF
         run: |
           npx eslint . \
             --ext .js,.jsx,.ts,.tsx \
             --format @microsoft/eslint-formatter-sarif \
             --output-file eslint-results.sarif \
-            || echo "ESLint found issues"
+            || echo "ESLint completed with reports"
 
-      - name: Debug file layout
+      # 6. Debug: list files so we can confirm SARIF location
+      - name: Debug workspace layout
         run: |
-          echo "Workspace is $GITHUB_WORKSPACE"
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
           ls -R .
 
-      - name: Upload SARIF to GitHub Code Scanning
+      # 7. Upload SARIF to GitHub Code Scanning (uses v3)
+      - name: Upload SARIF to CodeQL
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: eslint-results.sarif     # adjust path if under subfolder
+          sarif_file: '**/*.sarif'
           wait-for-processing: true
