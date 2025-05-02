@@ -3,10 +3,9 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ "main" ]
   schedule:
-    - cron: '39 11 * * 6'  # Fixed spacing issue in cron syntax
+    - cron: '39 11 * * 6'
 
 jobs:
   eslint:
@@ -25,34 +24,24 @@ jobs:
         with:
           node-version: '18'
           
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10
-          run_install: false
-          
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+      # Explicitly install pnpm globally first
+      - name: Install pnpm globally
+        run: npm install -g pnpm@latest-10
+        
+      # Verify pnpm is installed
+      - name: Verify pnpm installation
+        run: pnpm --version
           
       - name: Install dependencies
         run: pnpm install
           
-      - name: Run ESLint with SARIF output
+      - name: Install ESLint and SARIF formatter
         run: |
-          # Ensure ESLint and SARIF formatter are installed
-          pnpm add -D eslint@8.10.0 @microsoft/eslint-formatter-sarif@3.1.0
+          pnpm add -D eslint@8.10.0
+          pnpm add -D @microsoft/eslint-formatter-sarif@3.1.0
           
-          # Run ESLint and output to SARIF format
+      - name: Run ESLint
+        run: |
           pnpm eslint . \
             --ext .js,.jsx,.ts,.tsx \
             --format @microsoft/eslint-formatter-sarif \
