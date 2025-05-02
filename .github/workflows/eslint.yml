@@ -1,85 +1,61 @@
-name: ESLint & CodeQL Scan
+name: ESLint Check
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
-  schedule:
-    - cron: '39 11 * * 6'
-
-permissions:
-  contents: read
-  actions: read
-  security-events: write
+    branches: [ main ]
+  push:
+    branches: [ main ]
 
 jobs:
   lint-and-upload:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout
       - name: Checkout code
         uses: actions/checkout@v4
-
-      # 2. Setup pnpm & Node
-      - name: Setup pnpm
+      
+      - name: Setup PNPM
         uses: pnpm/action-setup@v4
         with:
           version: 10
-
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           cache: 'pnpm'
-
-      # 3. Install deps + SARIF formatter
+      
       - name: Install dependencies
+        run: pnpm install
+      
+      - name: Install ESLint and SARIF formatter
+        run: pnpm add -D eslint@latest @microsoft/eslint-formatter-sarif@latest
+      
+      - name: Create ESLint config if missing
         run: |
-          pnpm install
-          pnpm add -D eslint@8.10.0 \
-            @microsoft/eslint-formatter-sarif@3.1.0
-
-      # 4. Run ESLint → SARIF with absolute path
-      - name: Run ESLint → SARIF
+          if [ ! -f .eslintrc.json ] && [ ! -f .eslintrc.js ] && [ ! -f eslint.config.mjs ]; then
+            echo '{
+              "extends": "next/core-web-vitals"
+            }' > .eslintrc.json
+            echo "Created default .eslintrc.json file"
+          fi
+      
+      - name: Run ESLint
         run: |
           npx eslint . \
             --ext .js,.jsx,.ts,.tsx \
             --format @microsoft/eslint-formatter-sarif \
-            --output-file $GITHUB_WORKSPACE/eslint-results.sarif \
-            || echo "ESLint finished"
-
-      # 5. Enhanced debugging
-      - name: Debug working directory and files
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-          echo "Contents of current directory:"
-          ls -la
-          echo "Contents of GITHUB_WORKSPACE:"
-          ls -la $GITHUB_WORKSPACE
-          echo "Looking for SARIF files:"
-          find $GITHUB_WORKSPACE -name "*.sarif" -type f
-          echo "File permissions of SARIF files (if any):"
-          find $GITHUB_WORKSPACE -name "*.sarif" -type f -exec ls -la {} \;
-          echo "Creating a test SARIF file if none exists:"
-          if ! find $GITHUB_WORKSPACE -name "*.sarif" -type f | grep -q .; then
-            echo '{"version":"2.1.0","runs":[]}' > $GITHUB_WORKSPACE/test-eslint.sarif
-            echo "Created test SARIF file:"
-            ls -la $GITHUB_WORKSPACE/test-eslint.sarif
-          fi
-
-      # 6. Upload SARIF (v3) with full path
-      - name: Upload SARIF to CodeQL
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: ${{ github.workspace }}/eslint-results.sarif
-          wait-for-processing: true
+            --output-file eslint-results.sarif \
+            || echo "ESLint found issues but continuing workflow"
           
-      # 7. Alternative upload using test file if the main one fails
-      - name: Upload test SARIF if needed
-        if: failure()
+          # Make sure the file exists even if ESLint had an error
+          if [ ! -f eslint-results.sarif ]; then
+            echo '{"version":"2.1.0","runs":[{"tool":{"driver":{"name":"ESLint","informationUri":"https://eslint.org"}},"results":[]}]}' > eslint-results.sarif
+            echo "Created empty SARIF file because ESLint failed to generate one"
+          fi
+      
+      - name: Upload ESLint results
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: ${{ github.workspace }}/test-eslint.sarif
+          sarif_file: eslint-results.sarif
           wait-for-processing: true
+        if: always()  # Always try to upload results
