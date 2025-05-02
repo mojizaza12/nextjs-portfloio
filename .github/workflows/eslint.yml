@@ -6,30 +6,35 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
 jobs:
   lint-and-upload:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
         with:
           version: 10
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-      
+
       - name: Install dependencies
         run: pnpm install
-      
+
       - name: Install ESLint and SARIF formatter
         run: pnpm add -D eslint@latest @microsoft/eslint-formatter-sarif@latest
-      
+
       - name: Create ESLint config if missing
         run: |
           if [ ! -f .eslintrc.json ] && [ ! -f .eslintrc.js ] && [ ! -f eslint.config.mjs ]; then
@@ -38,7 +43,7 @@ jobs:
             }' > .eslintrc.json
             echo "Created default .eslintrc.json file"
           fi
-      
+
       - name: Run ESLint
         run: |
           npx eslint . \
@@ -46,16 +51,16 @@ jobs:
             --format @microsoft/eslint-formatter-sarif \
             --output-file eslint-results.sarif \
             || echo "ESLint found issues but continuing workflow"
-          
-          # Make sure the file exists even if ESLint had an error
+
+          # Ensure the SARIF file exists even if ESLint had an error
           if [ ! -f eslint-results.sarif ]; then
             echo '{"version":"2.1.0","runs":[{"tool":{"driver":{"name":"ESLint","informationUri":"https://eslint.org"}},"results":[]}]}' > eslint-results.sarif
             echo "Created empty SARIF file because ESLint failed to generate one"
           fi
-      
+
       - name: Upload ESLint results
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: eslint-results.sarif
           wait-for-processing: true
-        if: always()  # Always try to upload results
+        if: always()
