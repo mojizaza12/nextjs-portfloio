@@ -1,29 +1,26 @@
 name: ESLint & CodeQL Scan
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  push:          { branches: [ "main" ] }
+  pull_request:  { branches: [ "main" ] }
   schedule:
     - cron: '39 11 * * 6'
 
 permissions:
-  contents: read
+  contents:       read
+  actions:        read
   security-events: write
-  actions: read
 
 jobs:
-  lint-and-scan:
-    name: Run ESLint and Upload SARIF
+  lint-and-upload:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Check out your repository
+      # 1. Checkout
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Install pnpm (official action) and Node 20 for CodeQL v3
+      # 2. Setup pnpm & Node
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -34,29 +31,29 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
-      # 3. Install dependencies and SARIF formatter
+      # 3. Install deps + SARIF formatter
       - name: Install dependencies
         run: |
           pnpm install
           pnpm add -D eslint@8.10.0 \
                     @microsoft/eslint-formatter-sarif@3.1.0
 
-      # 4. Run ESLint, emit SARIF
+      # 4. Run ESLint → SARIF at repo root
       - name: Run ESLint → SARIF
         run: |
           npx eslint . \
             --ext .js,.jsx,.ts,.tsx \
             --format @microsoft/eslint-formatter-sarif \
-            --output-file eslint-results.sarif \
-            || echo "ESLint completed with reports"
+            --output-file $GITHUB_WORKSPACE/eslint-results.sarif \
+            || echo "ESLint finished"
 
-      # 5. Debug: confirm where the SARIF landed
-      - name: Debug workspace layout
+      # 5. Debug: confirm file present
+      - name: Debug SARIF files
         run: |
-          echo "Repository root is $GITHUB_WORKSPACE"
+          echo "Workspace: $GITHUB_WORKSPACE"
           ls -R .
 
-      # 6. Upload SARIF to CodeQL (glob under repo root)
+      # 6. Upload SARIF (v3)
       - name: Upload SARIF to CodeQL
         uses: github/codeql-action/upload-sarif@v3
         with:
