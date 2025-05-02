@@ -1,16 +1,13 @@
-name: ESLint
+name: ESLint & CodeQL
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  push:   { branches: [ "main" ] }
+  pull_request: { branches: [ "main" ] }
   schedule:
     - cron: '39 11 * * 6'
 
 jobs:
-  eslint:
-    name: Run ESLint scanning
+  lint-and-scan:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -21,34 +18,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
+      - name: Install pnpm & Node
         uses: pnpm/action-setup@v4
         with:
           version: 10
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Install ESLint and SARIF formatter
+      - name: Install deps & ESLint SARIF formatter
         run: |
+          pnpm install
           pnpm add -D eslint@8.10.0 @microsoft/eslint-formatter-sarif@3.1.0
 
-      - name: Run ESLint
+      - name: Run ESLint → SARIF
         run: |
           npx eslint . \
             --ext .js,.jsx,.ts,.tsx \
             --format @microsoft/eslint-formatter-sarif \
             --output-file eslint-results.sarif \
-            || echo "ESLint failed, but continuing workflow"
+            || echo "ESLint found issues"
 
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Debug file layout
+        run: |
+          echo "Workspace is $GITHUB_WORKSPACE"
+          ls -R .
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: eslint-results.sarif
+          sarif_file: eslint-results.sarif     # adjust path if under subfolder
           wait-for-processing: true
