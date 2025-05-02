@@ -1,4 +1,5 @@
 name: ESLint
+
 on:
   push:
     branches: [ "main" ]
@@ -9,39 +10,35 @@ on:
 
 jobs:
   eslint:
-    name: Run eslint scanning
+    name: Run ESLint scanning
     runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
       actions: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
-          
-      - name: Install pnpm
-        run: |
-          npm install -g pnpm@latest-10
-          echo "$(npm config get prefix)/bin" >> $GITHUB_PATH
-          
-      - name: Verify pnpm installation
-        run: |
-          which pnpm
-          pnpm --version
-          
+          cache: 'pnpm'
+
       - name: Install dependencies
         run: pnpm install
-          
+
       - name: Install ESLint and SARIF formatter
         run: |
-          pnpm add -D eslint@8.10.0
-          pnpm add -D @microsoft/eslint-formatter-sarif@3.1.0
-          
+          pnpm add -D eslint@8.10.0 @microsoft/eslint-formatter-sarif@3.1.0
+
       - name: Run ESLint
         run: |
           npx eslint . \
@@ -49,7 +46,7 @@ jobs:
             --format @microsoft/eslint-formatter-sarif \
             --output-file eslint-results.sarif \
             || echo "ESLint failed, but continuing workflow"
-            
+
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v2
         with:
