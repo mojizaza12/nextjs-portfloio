@@ -22,7 +22,7 @@ const ScratchToReviewPicture = () => {
     className="object-cover"
   />
 </ScratchToReveal>
-      <p className="text-base md:text-lg mb-4">ขูดเพื่อดูภาพ</p>
+      <p className="text-base md:text-lg mb-4 text-center">ขูดเพื่อดูภาพ</p>
     </div>
   )
 }

@@ -34,7 +34,7 @@ export function HeroSection() {
           <div className="text-center px-4">
             <h1 className="flex items-center justify-center gap-2 text-4xl sm:text-6xl md:text-8xl font-semibold leading-none">
             <SparklesText sparklesCount={5}>
-              Bannawat&apos;s Portfolio
+              Bannawat&apos;s About Me
               </SparklesText>
               <Image 
                 src={waveEmoji}
@@ -63,7 +63,7 @@ export function HeroSection() {
           <div className="absolute bottom-20 sm:bottom-32 w-full flex justify-center">
             <Link href="#Portfolio">
               <ShimmerButton className="mt-4 gap-2 text-base sm:text-lg text-white dark:text-white lg:text-lg bg-black/80 dark:bg-white/10">
-                <span>View Portfolio</span>
+                <span>View About Me</span>
                 <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </ShimmerButton>
             </Link>

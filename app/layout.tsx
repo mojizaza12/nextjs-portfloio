@@ -3,6 +3,7 @@ import { Kanit, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ScrollProgress } from "@/components/magicui/scroll-progress";
+import { Analytics } from '@vercel/analytics/next';
 
 const KanitSans = Kanit({
   variable: "--font-kanit",
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Bannawat Portfolio",
     description: "Created by Moji Dev",
-    images: ["https://yourdomain.com/opengraph-image.png"],
+    images: ["https://my-portfloio.bannawat.store/bannerog.png"],
   },
 };
 
@@ -60,6 +61,7 @@ export default function RootLayout({
         >
           <ScrollProgress />
           {children}
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>

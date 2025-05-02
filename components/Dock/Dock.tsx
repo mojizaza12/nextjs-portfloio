@@ -1,15 +1,20 @@
 "use client";
 
 import React from "react";
-
+import { useTheme } from "next-themes";
 import { Dock, DockIcon } from "@/components/magicui/dock";
 import Link from "next/link";
-
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
 
 export function DockComponent() {
+  const { setTheme, theme } = useTheme();
+
   return (
     <div className="relative">
       <Dock iconMagnification={60} iconDistance={100}>
@@ -19,15 +24,32 @@ export function DockComponent() {
           </DockIcon>
         </Link>
         <Link href="mailto:kaji.kanlapat99@gmail.com" target="_blank">
-        <DockIcon className="bg-black/10 dark:bg-white/10">
-          <Icons.googleGmail className="size-full" />
-        </DockIcon>
+          <DockIcon className="bg-black/10 dark:bg-white/10">
+            <Icons.googleGmail className="size-full" />
+          </DockIcon>
         </Link>
-        <Link href="tel:+1234567890" target="_blank">
+        <Link href="tel:+6695439158" target="_blank">
           <DockIcon className="bg-black/10 dark:bg-white/10">
             <Icons.Call className="size-full" />
           </DockIcon>
         </Link>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DockIcon 
+              className="bg-black/10 dark:bg-white/10 cursor-pointer" 
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            >
+              {theme === "dark" ? (
+                <Icons.moon className="size-full" />
+              ) : (
+                <Icons.sun className="size-full" />
+              )}
+            </DockIcon>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Toggle Theme</p>
+          </TooltipContent>
+        </Tooltip>
       </Dock>
     </div>
   );
@@ -71,7 +93,7 @@ const Icons = {
     </svg>
   ),
   Call: (props: IconProps) => (
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" strokeLinecap="round" stroke-linejoin="round" className="lucide lucide-phone-icon lucide-phone"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-phone-icon lucide-phone"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
   ),
   
   googleGmail : (props: IconProps) => (
@@ -88,5 +110,11 @@ const Icons = {
   ),
   Facebook : (props: IconProps) => (
     <svg width="800px" height="50px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none"><path fill="#1877F2" d="M15 8a7 7 0 00-7-7 7 7 0 00-1.094 13.915v-4.892H5.13V8h1.777V6.458c0-1.754 1.045-2.724 2.644-2.724.766 0 1.567.137 1.567.137v1.723h-.883c-.87 0-1.14.54-1.14 1.093V8h1.941l-.31 2.023H9.094v4.892A7.001 7.001 0 0015 8z"/><path fill="#ffffff" d="M10.725 10.023L11.035 8H9.094V6.687c0-.553.27-1.093 1.14-1.093h.883V3.87s-.801-.137-1.567-.137c-1.6 0-2.644.97-2.644 2.724V8H5.13v2.023h1.777v4.892a7.037 7.037 0 002.188 0v-4.892h1.63z"/></svg>
-  ),    
+  ),
+  sun: (props: IconProps) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+  ),
+  moon: (props: IconProps) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+  ),
 };
