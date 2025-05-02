@@ -24,13 +24,15 @@ jobs:
         with:
           node-version: '18'
           
-      # Explicitly install pnpm globally first
-      - name: Install pnpm globally
-        run: npm install -g pnpm@latest-10
-        
-      # Verify pnpm is installed
+      - name: Install pnpm
+        run: |
+          npm install -g pnpm@latest-10
+          echo "$(npm config get prefix)/bin" >> $GITHUB_PATH
+          
       - name: Verify pnpm installation
-        run: pnpm --version
+        run: |
+          which pnpm
+          pnpm --version
           
       - name: Install dependencies
         run: pnpm install
@@ -42,7 +44,7 @@ jobs:
           
       - name: Run ESLint
         run: |
-          pnpm eslint . \
+          npx eslint . \
             --ext .js,.jsx,.ts,.tsx \
             --format @microsoft/eslint-formatter-sarif \
             --output-file eslint-results.sarif \
