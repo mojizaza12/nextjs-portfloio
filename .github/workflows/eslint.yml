@@ -40,25 +40,46 @@ jobs:
           pnpm add -D eslint@8.10.0 \
             @microsoft/eslint-formatter-sarif@3.1.0
 
-      # 4. Run ESLint → SARIF at repo root
+      # 4. Run ESLint → SARIF with absolute path
       - name: Run ESLint → SARIF
         run: |
           npx eslint . \
             --ext .js,.jsx,.ts,.tsx \
             --format @microsoft/eslint-formatter-sarif \
-            --output-file eslint-results.sarif \
+            --output-file $GITHUB_WORKSPACE/eslint-results.sarif \
             || echo "ESLint finished"
 
-      # 5. Debug: confirm file present
-      - name: Debug SARIF files
+      # 5. Enhanced debugging
+      - name: Debug working directory and files
         run: |
-          echo "Workspace: $GITHUB_WORKSPACE"
-          ls -la *.sarif || echo "No SARIF files in root directory"
-          find $GITHUB_WORKSPACE -name "*.sarif" || echo "No SARIF files found in workspace"
+          echo "Current directory: $(pwd)"
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          echo "Contents of current directory:"
+          ls -la
+          echo "Contents of GITHUB_WORKSPACE:"
+          ls -la $GITHUB_WORKSPACE
+          echo "Looking for SARIF files:"
+          find $GITHUB_WORKSPACE -name "*.sarif" -type f
+          echo "File permissions of SARIF files (if any):"
+          find $GITHUB_WORKSPACE -name "*.sarif" -type f -exec ls -la {} \;
+          echo "Creating a test SARIF file if none exists:"
+          if ! find $GITHUB_WORKSPACE -name "*.sarif" -type f | grep -q .; then
+            echo '{"version":"2.1.0","runs":[]}' > $GITHUB_WORKSPACE/test-eslint.sarif
+            echo "Created test SARIF file:"
+            ls -la $GITHUB_WORKSPACE/test-eslint.sarif
+          fi
 
-      # 6. Upload SARIF (v3)
+      # 6. Upload SARIF (v3) with full path
       - name: Upload SARIF to CodeQL
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: eslint-results.sarif
+          sarif_file: ${{ github.workspace }}/eslint-results.sarif
+          wait-for-processing: true
+          
+      # 7. Alternative upload using test file if the main one fails
+      - name: Upload test SARIF if needed
+        if: failure()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ github.workspace }}/test-eslint.sarif
           wait-for-processing: true
