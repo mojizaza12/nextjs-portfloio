@@ -6,7 +6,7 @@ on:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
   schedule:
-    - cron: '39 11 * * 6'  # Fixed spacing in cron syntax
+    - cron: '39 11 * * 6'
 
 jobs:
   eslint:
@@ -68,8 +68,6 @@ jobs:
           ls -la
           cat eslint-results.sarif
           
-      - name: Upload analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: eslint-results.sarif
-          wait-for-processing: true
+      # Note: Upload step removed to avoid conflict with default CodeQL setup
+      # If you want to use this custom upload, you need to disable GitHub's default CodeQL setup
+      # in your repository settings
