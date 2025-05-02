@@ -1,20 +1,21 @@
 name: ESLint & CodeQL Scan
 
 on:
-  push:          { branches: [ "main" ] }
-  pull_request:  { branches: [ "main" ] }
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   schedule:
     - cron: '39 11 * * 6'
 
 permissions:
-  contents:       read
-  actions:        read
+  contents: read
+  actions: read
   security-events: write
 
 jobs:
   lint-and-upload:
     runs-on: ubuntu-latest
-
     steps:
       # 1. Checkout
       - name: Checkout code
@@ -25,6 +26,7 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 10
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -36,7 +38,7 @@ jobs:
         run: |
           pnpm install
           pnpm add -D eslint@8.10.0 \
-                    @microsoft/eslint-formatter-sarif@3.1.0
+            @microsoft/eslint-formatter-sarif@3.1.0
 
       # 4. Run ESLint → SARIF at repo root
       - name: Run ESLint → SARIF
@@ -44,18 +46,19 @@ jobs:
           npx eslint . \
             --ext .js,.jsx,.ts,.tsx \
             --format @microsoft/eslint-formatter-sarif \
-            --output-file $GITHUB_WORKSPACE/eslint-results.sarif \
+            --output-file eslint-results.sarif \
             || echo "ESLint finished"
 
       # 5. Debug: confirm file present
       - name: Debug SARIF files
         run: |
           echo "Workspace: $GITHUB_WORKSPACE"
-          ls -R .
+          ls -la *.sarif || echo "No SARIF files in root directory"
+          find $GITHUB_WORKSPACE -name "*.sarif" || echo "No SARIF files found in workspace"
 
       # 6. Upload SARIF (v3)
       - name: Upload SARIF to CodeQL
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: '**/*.sarif'
+          sarif_file: eslint-results.sarif
           wait-for-processing: true
