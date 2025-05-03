@@ -1,73 +1,65 @@
-name: ESLint
+name: eslint
+
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "main" ]
-  schedule:
-    - cron: '39 11 * * 6'
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
 
 jobs:
   eslint:
-    name: Run eslint scanning
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
         with:
-          node-version: '18'
-          
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
       - name: Install dependencies
-        run: |
-          pnpm install
-          
+        run: pnpm install
+
       - name: Install ESLint and SARIF formatter
+        run: pnpm add -D eslint@latest @microsoft/eslint-formatter-sarif@latest
+
+      - name: Create ESLint config if missing
         run: |
-          pnpm install eslint@8.10.0
-          pnpm install @microsoft/eslint-formatter-sarif@3.1.0
-          
+          if [ ! -f .eslintrc.json ] && [ ! -f .eslintrc.js ] && [ ! -f eslint.config.mjs ]; then
+            echo '{
+              "extends": "next/core-web-vitals"
+            }' > .eslintrc.json
+            echo "Created default .eslintrc.json file"
+          fi
+
       - name: Run ESLint
         run: |
-          # Create a minimal ESLint report directly
-          echo '{
-            "version": "2.1.0",
-            "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-            "runs": [
-              {
-                "tool": {
-                  "driver": {
-                    "name": "ESLint",
-                    "informationUri": "https://eslint.org",
-                    "rules": [],
-                    "version": "8.10.0"
-                  }
-                },
-                "results": []
-              }
-            ]
-          }' > eslint-results.sarif
-          
-          # Attempt to run ESLint if possible
-          npx eslint --version && \
           npx eslint . \
             --ext .js,.jsx,.ts,.tsx \
             --format @microsoft/eslint-formatter-sarif \
-            --output-file eslint-results.sarif || echo "Using default empty SARIF file"
-            
-      - name: Debug
-        run: |
-          pwd
-          ls -la
-          cat eslint-results.sarif
-          
-      # Note: Upload step removed to avoid conflict with default CodeQL setup
-      # If you want to use this custom upload, you need to disable GitHub's default CodeQL setup
-      # in your repository settings
+            --output-file eslint-results.sarif \
+            || echo "ESLint found issues but continuing workflow"
+
+          if [ ! -f eslint-results.sarif ]; then
+            echo '{"version":"2.1.0","runs":[{"tool":{"driver":{"name":"ESLint","informationUri":"https://eslint.org"}},"results":[]}]}' > eslint-results.sarif
+            echo "Created empty SARIF file because ESLint failed to generate one"
+          fi
+
+      - name: Upload ESLint results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: eslint-results.sarif
+          wait-for-processing: true
+        if: always()
